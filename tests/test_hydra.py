@@ -7,7 +7,7 @@ from hydra.test_utils.launcher_common_tests import (
 )
 from pytest import mark
 
-from hydra_plugins.filter_sweeper import FilterSweeper
+from hydra_plugins.filter import FilterSweeper
 
 
 def test_discovery() -> None:
@@ -21,7 +21,7 @@ def test_discovery() -> None:
     [
         (
             "basic",
-            ["hydra/sweeper=filter-sweeper"],
+            ["hydra/sweeper=filter"],
         )
     ],
 )
@@ -34,7 +34,7 @@ class TestFilterSweeper(LauncherTestSuite): ...
         (
             "basic",
             [
-                "hydra/sweeper=filter-sweeper",
+                "hydra/sweeper=filter",
                 "hydra.sweeper.max_batch_size=2",
             ],
         )
@@ -50,7 +50,7 @@ class TestFilterSweeperWithBatching(BatchedSweeperTestSuite): ...
             {},
             [
                 "-m",
-                "hydra/sweeper=filter-sweeper",
+                "hydra/sweeper=filter",
                 "hydra/launcher=basic",
             ],
         )

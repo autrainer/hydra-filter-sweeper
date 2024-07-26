@@ -8,7 +8,7 @@ license = "MIT"
 keywords = ["hydra", "plugin", "sweeper", "filter"]
 packages = [
     { include = "hydra_filter_sweeper" },
-    { include = "filter_sweeper.py", from = "hydra_plugins" },
+    { include = "filter.py", from = "hydra_plugins" },
 ]
 
 [tool.poetry.dependencies]

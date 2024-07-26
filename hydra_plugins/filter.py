@@ -16,14 +16,14 @@ log = logging.getLogger(__name__)
 
 @dataclass
 class FilterSweeperConfig:
-    _target_: str = "hydra_plugins.filter_sweeper.FilterSweeper"
+    _target_: str = "hydra_plugins.filter.FilterSweeper"
     max_batch_size: Optional[int] = None
     params: Dict[str, Any] = field(default_factory=dict)
     filters: List[str] = field(default_factory=list)
 
 
 ConfigStore.instance().store(
-    group="hydra/sweeper", name="filter-sweeper", node=FilterSweeperConfig
+    group="hydra/sweeper", name="filter", node=FilterSweeperConfig
 )
 
 

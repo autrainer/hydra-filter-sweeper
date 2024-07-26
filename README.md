@@ -22,7 +22,7 @@ pip install hydra-filter-sweeper
 
 ## Usage
 
-To use `hydra-filter-sweeper`, override the default sweeper with `filter-sweeper` at the end of the defaults list.
+To use `hydra-filter-sweeper`, override the default sweeper with `filter` at the end of the defaults list.
 
 Filters are specified as a list of dictionaries and can be of type `expr`, `exists`, or `script`.
 If a filters evaluates to `True`, the current configuration is excluded from the sweep.
@@ -35,7 +35,7 @@ All filters support OmegaConf's [interpolation syntax](https://omegaconf.readthe
 ```yaml
 defaults:
   - _self_
-  - override hydra/sweeper: filter-sweeper
+  - override hydra/sweeper: filter
 
 some_value: four
 
