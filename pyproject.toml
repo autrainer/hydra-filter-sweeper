@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "hydra-filter-sweeper"
 version = "1.0.0"
-description = "A plugin to extend the hydra basic sweeper with customizable filters."
+description = "A Hydra plugin to extend the basic sweeper with customizable filters."
 authors = ["Simon Rampp <simon@rampp.dev>"]
 readme = "README.md"
 license = "MIT"
