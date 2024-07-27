@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-import importlib
 import os
 
 from evalidate import Expr
+import hydra
 from omegaconf import DictConfig
 
 
@@ -84,56 +84,38 @@ class FilterExpr(AbstractFilter):
         return Expr(expr).eval(config)
 
 
-class FilterScript(AbstractFilter):
+class FilterClass(AbstractFilter):
     """
-    Filter based on the return value of any of the filter classes in the
-    given Python script.
+    Filter based on the return value of a given filter class.
+
     """
 
     def filter(
         self,
         config: DictConfig,
         directory: str,
-        path: str,
+        target: str,
         **kwargs,
     ) -> bool:
-        """
-        Filter based on the return value of any of the filter classes in the
-        given Python script.
+        """Filter based on the return value of the filter class.
 
         If the filter condition is met and the configuration should be
         excluded, returns True. Otherwise, returns False.
 
         Args:
             config: The configuration to be used for filtering.
-            directory: The directory to be filtered.
-            path: The path to the Python script.
-            **kwargs: Additional keyword arguments.
+            directory: The current job directory.
+            target: Python relative import path to the filter class inheriting
+                from AbstractFilter.
 
         Returns:
-            True if any of the filter classes in the script return True,
-            False otherwise.
-
-        Raises:
-            ValueError: If the script does not exist or does not contain any
-            filter classes.
+            True if the filter class returns True, False otherwise.
         """
-        if not os.path.exists(path):
-            raise ValueError(f"Script '{path}' does not exist")
-        module = path.replace("/", ".").replace(".py", "")
-        module = importlib.import_module(module)
-        filter_classes = [
-            cls
-            for cls in module.__dict__.values()
-            if isinstance(cls, type)
-            and issubclass(cls, AbstractFilter)
-            and cls is not AbstractFilter
-        ]
-        if not filter_classes:
-            raise ValueError(
-                f"Script '{path}' does not contain any filter classes"
+        filter_class = hydra.utils.instantiate({"_target_": target})
+
+        if not isinstance(filter_class, AbstractFilter):
+            raise TypeError(
+                f"Filter class {target} does not inherit from AbstractFilter"
             )
-        for cls in filter_classes:
-            if cls().filter(config, directory, **kwargs):
-                return True
-        return False
+
+        return filter_class.filter(config, directory, **kwargs)

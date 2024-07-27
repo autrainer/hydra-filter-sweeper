@@ -1,12 +1,13 @@
 from evalidate import EvalException
+from hydra.errors import InstantiationException
 from omegaconf import DictConfig
 import pytest
 
 from hydra_filter_sweeper.filters import (
     AbstractFilter,
+    FilterClass,
     FilterExists,
     FilterExpr,
-    FilterScript,
 )
 
 
@@ -21,8 +22,8 @@ def filter_expr():
 
 
 @pytest.fixture
-def filter_script():
-    return FilterScript()
+def filter_class():
+    return FilterClass()
 
 
 class TestAbstractFilter:
@@ -33,7 +34,7 @@ class TestAbstractFilter:
 
 
 class TestFilterExists:
-    def test_filter(self, filter_exists):
+    def test_filter(self, filter_exists: FilterExists):
         # Test case for filtering a file that exists
         assert filter_exists.filter({}, "tests/test_files", "some.file")
 
@@ -50,7 +51,7 @@ class TestFilterExists:
             {}, "tests/test_files", "nonexistent_directory"
         )
 
-    def test_filter_with_subdir(self, filter_exists):
+    def test_filter_with_subdir(self, filter_exists: FilterExists):
         # Test case for filtering a file in a subdir that exists
         assert filter_exists.filter({}, "tests/test_files", "subdir/some.file")
 
@@ -61,7 +62,7 @@ class TestFilterExists:
 
 
 class TestFilterExpr:
-    def test_filter(self, filter_expr):
+    def test_filter(self, filter_expr: FilterExpr):
         # Test case for evaluating a valid expression that returns True
         assert filter_expr.filter(
             DictConfig({"foo": "bar"}), "", "foo == 'bar'"
@@ -87,37 +88,65 @@ class TestFilterExpr:
             )
 
 
-class TestFilterScript:
-    def test_filter(self, filter_script):
-        # Test case for filtering a script that returns True
-        assert filter_script.filter(
+class TestFilterClass:
+    def test_filter(self, filter_class: FilterClass):
+        # Test case for filtering a class that returns True
+        assert filter_class.filter(
             DictConfig({"return_value": True}),
             "",
-            "tests/test_files/test_script.py",
+            "tests.test_files.test_filter_classes.TestReturnFilter",
         )
 
-        # Test case for filtering a script that returns False
-        assert not filter_script.filter(
+        # Test case for filtering a class that returns False
+        assert not filter_class.filter(
             DictConfig({"return_value": False}),
             "",
-            "tests/test_files/test_script.py",
+            "tests.test_files.test_filter_classes.TestReturnFilter",
         )
 
-        # Test case for filtering an empty script
-        with pytest.raises(ValueError):
-            filter_script.filter(
-                {}, "", "tests/test_files/test_script_empty.py"
+        # Test case for filtering a nonexistent module
+        with pytest.raises(InstantiationException):
+            filter_class.filter({}, "", "nonexistent_module")
+
+        # Test case for filtering a nonexistent class
+        with pytest.raises(InstantiationException):
+            filter_class.filter(
+                {},
+                "",
+                "tests.test_files.test_filter_classes.NonexistentFilter",
             )
 
-        # Test case for filtering a nonexistent script
-        with pytest.raises(ValueError):
-            filter_script.filter({}, "", "nonexistent_script.py")
+        # Test case for filtering a class not inheriting from AbstractFilter
+        with pytest.raises(TypeError):
+            filter_class.filter(
+                DictConfig({"return_value": True}),
+                "",
+                "tests.test_files.test_filter_classes.TestInvalidFilter",
+            )
 
-        # Test case for filtering a script with additional arguments
-        assert filter_script.filter(
+        # Test case for filtering with additional arguments
+        assert not filter_class.filter(
             DictConfig({"return_value": True}),
             "",
-            "tests/test_files/test_script.py",
+            "tests.test_files.test_filter_classes.TestArgEqualsFilter",
             arg1="value1",
             arg2="value2",
         )
+
+        # Test case for filtering a class with too many arguments
+        with pytest.raises(TypeError):
+            filter_class.filter(
+                DictConfig({"return_value": True}),
+                "",
+                "tests.test_files.test_filter_classes.TestReturnFilter",
+                arg1="value1",
+                arg2="value2",
+            )
+
+        # Test case for filtering a class with too few arguments
+        with pytest.raises(TypeError):
+            filter_class.filter(
+                DictConfig({"return_value": True}),
+                "",
+                "tests.test_files.test_filter_classes.TestArgEqualsFilter",
+            )

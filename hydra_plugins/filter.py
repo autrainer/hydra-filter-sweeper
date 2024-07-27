@@ -131,7 +131,7 @@ class FilterSweeper(BasicSweeper):
             try:
                 filter_cls = FILTERMAP[filter_type]
             except KeyError:
-                raise ValueError(f"Filter type='{filter_type}' not supported")
+                raise ValueError(f"Filter type '{filter_type}' not supported")
             fail = f.pop("fail", True)
             try:
                 should_filter = filter_cls().filter(

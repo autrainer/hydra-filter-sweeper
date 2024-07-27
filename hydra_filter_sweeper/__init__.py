@@ -2,22 +2,22 @@ from typing import Dict
 
 from hydra_filter_sweeper.filters import (
     AbstractFilter,
+    FilterClass,
     FilterExists,
     FilterExpr,
-    FilterScript,
 )
 
 
 FILTERMAP: Dict[str, AbstractFilter] = {
     "exists": FilterExists,
     "expr": FilterExpr,
-    "script": FilterScript,
+    "class": FilterClass,
 }
 
 __all__ = [
     "AbstractFilter",
     "FilterExists",
     "FilterExpr",
-    "FilterScript",
+    "FilterClass",
     "FILTERMAP",
 ]
