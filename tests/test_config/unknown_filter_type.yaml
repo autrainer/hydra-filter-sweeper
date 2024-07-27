@@ -1,21 +1,15 @@
 defaults:
   - _self_
   - override hydra/sweeper: filter
-  - override hydra/hydra_logging: disabled  
-  - override hydra/job_logging: disabled  
 
 hydra:
-  output_subdir: null
   mode: MULTIRUN
-  sweep:
-    dir: .
-    subdir: .
   sweeper:
     params:
       +foo: 1,2,3
-      +bar: 1,2,3
+      +bar: one, two, three
     filters:
     - type: expr
-      expr: "foo == 1 and bar == 2"
+      expr: foo == 1 and bar == "two"
     - type: unknown
-      expr: "foo == 2 and bar == 3"
+      expr: foo == 2 and bar == "three"
