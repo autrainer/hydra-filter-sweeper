@@ -144,10 +144,13 @@ method that returns `True` if the configuration should be excluded.
 The `filter` method receives the configuration, the run's directory, and any additional keyword arguments as parameters.
 
 ```python
+from omegaconf import DictConfig
+
 from hydra_filter_sweeper import AbstractFilter
 
+
 class SomeFilter(AbstractFilter):
-    def filter(self, config: DictConfig, directory: str, some_arg:str) -> bool:
+    def filter(self, config: DictConfig, directory: str, some_arg: str) -> bool:
         return config.foo == 1 and config.bar == "two" and some_arg == "four"
 ```
 
