@@ -14,6 +14,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.9"
 hydra-core = "^1.3.2"
+evalidate = "^2.0.3"
 
 
 [tool.poetry.group.dev.dependencies]

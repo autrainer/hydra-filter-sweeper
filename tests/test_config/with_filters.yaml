@@ -21,4 +21,4 @@ hydra:
       expr: "foo == 2 and bar == 3"
     - type: expr
       expr: "undefined == 1 and bar == 2"
-      fail: False
+      fail: false

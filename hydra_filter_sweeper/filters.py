@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import importlib
 import os
 
+from evalidate import Expr
 from omegaconf import DictConfig
 
 
@@ -80,10 +81,7 @@ class FilterExpr(AbstractFilter):
         Raises:
             ValueError: If there is an error evaluating the expression.
         """
-        try:
-            return eval(expr, {}, {**config})
-        except Exception:
-            raise ValueError(f"Error evaluating expression: {expr}")
+        return Expr(expr).eval(config)
 
 
 class FilterScript(AbstractFilter):

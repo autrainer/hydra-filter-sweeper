@@ -1,3 +1,4 @@
+from evalidate import EvalException
 from omegaconf import DictConfig
 import pytest
 
@@ -71,15 +72,19 @@ class TestFilterExpr:
             DictConfig({"foo": "bar"}), "", "foo == 'baz'"
         )
 
-        # Test case for evaluating an invalid expression
-        with pytest.raises(ValueError):
+        # Test case for evaluating an invalid expression with missing variable
+        with pytest.raises(EvalException):
             filter_expr.filter(
                 DictConfig({"foo": "bar"}), "", "foo == invalid"
             )
 
-        # Test case for evaluating an expression with a missing key
-        with pytest.raises(ValueError):
-            filter_expr.filter(DictConfig({}), "", "foo == 'missing'")
+        # Test case for evaluating an unsafe expression
+        with pytest.raises(EvalException):
+            filter_expr.filter(
+                DictConfig({}),
+                "",
+                "__import__('os').system('echo unsafe')",
+            )
 
 
 class TestFilterScript:

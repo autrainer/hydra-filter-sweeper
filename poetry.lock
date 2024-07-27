@@ -128,6 +128,17 @@ files = [
 ]
 
 [[package]]
+name = "evalidate"
+version = "2.0.3"
+description = "Validation and secure evaluation of untrusted python expressions"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "evalidate-2.0.3-py3-none-any.whl", hash = "sha256:0ec20b9b29649c7b93436e05254d1871e3137c6c91c13973436393d648a7461c"},
+    {file = "evalidate-2.0.3.tar.gz", hash = "sha256:5a18e1bd7427ccde2518bad90d7bcec07308a2346822ac094e8fcf8094b8fab8"},
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.2.2"
 description = "Backport of PEP 654 (exception groups)"
@@ -443,4 +454,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "b36c1261d4d0b96caf48c812e275c098245f41f91622f8db4ec4f9799f044a7a"
+content-hash = "5334b8c4d47c446e08291b64df8b1faab4b5f9d397ecbcb39326f67f04a52c72"
