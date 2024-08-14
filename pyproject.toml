@@ -11,10 +11,7 @@ authors = [
 readme = "README.md"
 license = "MIT"
 keywords = ["hydra", "plugin", "sweeper", "filter"]
-packages = [
-    { include = "hydra_filter_sweeper" },
-    { include = "filter.py", from = "hydra_plugins" },
-]
+packages = [{ include = "hydra_filter_sweeper" }, { include = "hydra_plugins" }]
 
 classifiers = [
     "Programming Language :: Python :: 3",
