@@ -2,7 +2,12 @@
 name = "hydra-filter-sweeper"
 version = "1.0.0"
 description = "A Hydra plugin to extend the basic sweeper with customizable filters."
-authors = ["Simon Rampp <simon@rampp.dev>"]
+authors = [
+    "Simon Rampp <simon.rampp@tum.de>",
+    "Andreas Triantafyllopoulos <andreas.triantafyllopoulos@tum.de>",
+    "Manuel Milling <manuel.milling@tum.de>",
+    "Björn W. Schuller <schuller@tum.de>",
+]
 readme = "README.md"
 license = "MIT"
 keywords = ["hydra", "plugin", "sweeper", "filter"]
