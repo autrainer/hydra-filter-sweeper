@@ -1,0 +1,13 @@
+defaults:
+  - _self_
+  - override hydra/sweeper: filter
+hydra:
+  mode: MULTIRUN
+  sweeper:
+    params:
+      +foo: 1,2,3
+      +bar: one, two, three
+    filters:
+    - type: expr
+      expr: foo == 1 and bar == "two"
+    - expr: foo == 2 and bar == "three"
