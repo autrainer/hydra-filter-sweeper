@@ -1,5 +1,9 @@
 # Hydra Filter Sweeper Plugin
 
+[![PyPI Version](https://img.shields.io/pypi/v/hydra-filter-sweeper?logo=pypi&logoColor=b4befe&color=b4befe)](https://pypi.org/project/hydra-filter-sweeper/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/hydra-filter-sweeper?logo=python&logoColor=b4befe&color=b4befe)](https://pypi.org/project/hydra-filter-sweeper/)
+[![License](https://img.shields.io/badge/license-MIT-b4befe?logo=c)](https://github.com/autrainer/hydra-filter-sweeper/blob/main/LICENSE)
+
 `hydra-filter-sweeper` is a plugin for [Hydra](https://hydra.cc/) that extends the [basic sweeper](https://hydra.cc/docs/tutorials/basic/running_your_app/multi-run/#sweeper) by the addition of filters, enabling more targeted parameter sweeps.
 
 The plugin is compatible with any [Hydra launcher plugin](https://hydra.cc/docs/tutorials/basic/running_your_app/multi-run/#launcher).
