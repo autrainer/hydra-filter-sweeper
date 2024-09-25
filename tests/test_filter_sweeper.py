@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 import tempfile
 
@@ -66,3 +67,28 @@ def test_error_types(
     with pytest.raises(raises):
         with sweep:
             ...  # pragma: no cover
+
+
+def test_suppress_logs(
+    hydra_sweep_runner: TSweepRunner,
+    temp_dir,
+    caplog,
+) -> None:
+    sweep = hydra_sweep_runner(
+        calling_file=__file__,
+        calling_module=None,
+        config_path="test_config",
+        config_name="with_suppressed_filters.yaml",
+        task_function=None,
+        overrides=None,
+        temp_dir=temp_dir,
+    )
+    with caplog.at_level(logging.INFO):
+        with sweep:
+            assert sweep.returns is not None
+            job_ret = sweep.returns[0]
+            assert len(job_ret) == 7
+
+    assert "Filtered: +foo=1 +bar=two with expr" in caplog.text
+    assert "Filtered: +foo=2 +bar=three with expr" not in caplog.text
+    assert "+foo=2 +bar=three" not in caplog.text
