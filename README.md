@@ -78,7 +78,7 @@ The configuration is excluded if the expression evaluates to `True`.
 **Parameters**:
 
 - `expr` (_str_): Python expression to evaluate.
-- `fail` (_bool_): Whether to fail if the expression raises an exception. Default is `True`.
+- `fail` (_bool_): Whether to fail if the filter raises an exception. Default is `True`.
 
 **Example Configuration**
 
@@ -101,7 +101,7 @@ The configuration is excluded if the file or directory exists.
 **Parameters**:
 
 - `path` (_str_): Path to the file or directory to check if it exists in the run's directory.
-- `fail` (_bool_): Whether to fail if the expression raises an exception. Default is `True`.
+- `fail` (_bool_): Whether to fail if the filter raises an exception. Default is `True`.
 
 **Example Configuration**
 
@@ -127,7 +127,7 @@ The configuration is excluded if the filter method returns `True`.
 
 - `target` (_str_): Python relative import path to the class.
 - `*` (_Any_): Additional keyword arguments passed to the filter method of the class.
-- `fail` (_bool_): Whether to fail if the expression raises an exception. Default is `True`.
+- `fail` (_bool_): Whether to fail if the filter raises an exception. Default is `True`.
 
 **Example Configuration**
 
