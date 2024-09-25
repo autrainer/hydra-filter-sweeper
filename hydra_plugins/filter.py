@@ -133,6 +133,7 @@ class FilterSweeper(BasicSweeper):
             except KeyError:
                 raise ValueError(f"Filter type '{filter_type}' not supported")
             fail = f.pop("fail", True)
+            should_log = f.pop("log", True)
             try:
                 should_filter = filter_cls().filter(
                     config=config,
@@ -144,7 +145,8 @@ class FilterSweeper(BasicSweeper):
                     raise ValueError(f"Filter {f} failed: {e}") from e
 
             if should_filter:
-                override = " ".join(override)
-                log.info(f"Filtered: {override} with {filter_type}: {f}")
+                if should_log:
+                    override = " ".join(override)
+                    log.info(f"Filtered: {override} with {filter_type}: {f}")
                 return True
         return False

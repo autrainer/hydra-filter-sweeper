@@ -78,7 +78,8 @@ The configuration is excluded if the expression evaluates to `True`.
 **Parameters**:
 
 - `expr` (_str_): Python expression to evaluate.
-- `fail` (_bool_): Whether to fail if the expression raises an exception. Default is `True`.
+- `fail` (_bool_): Whether to fail if the filter raises an exception. Default is `True`.
+- `log` (_bool_): Whether to log the configuration if the filter evaluates to `True`. Default is `True`.
 
 **Example Configuration**
 
@@ -91,6 +92,7 @@ hydra/sweeper/filters:
   - type: expr
     expr: undefined == 1 and bar == "two"
     fail: false
+    log: false
 ```
 
 ### Exists Filter (`exists`)
@@ -101,7 +103,8 @@ The configuration is excluded if the file or directory exists.
 **Parameters**:
 
 - `path` (_str_): Path to the file or directory to check if it exists in the run's directory.
-- `fail` (_bool_): Whether to fail if the expression raises an exception. Default is `True`.
+- `fail` (_bool_): Whether to fail if the filter raises an exception. Default is `True`.
+- `log` (_bool_): Whether to log the configuration if the filter evaluates to `True`. Default is `True`.
 
 **Example Configuration**
 
@@ -111,6 +114,7 @@ hydra/sweeper/filters:
     path: some_directory/some.file
   - type: exists
     path: some_directory
+    log: false
   - type: exists
     path: some_directory/${some_value}.file
   - type: exists
@@ -127,7 +131,8 @@ The configuration is excluded if the filter method returns `True`.
 
 - `target` (_str_): Python relative import path to the class.
 - `*` (_Any_): Additional keyword arguments passed to the filter method of the class.
-- `fail` (_bool_): Whether to fail if the expression raises an exception. Default is `True`.
+- `fail` (_bool_): Whether to fail if the filter raises an exception. Default is `True`.
+- `log` (_bool_): Whether to log the configuration if the filter evaluates to `True`. Default is `True`.
 
 **Example Configuration**
 
@@ -136,6 +141,7 @@ hydra/sweeper/filters:
   - type: class
     target: some_filter.SomeFilter
     some_arg: ${some_value}
+    log: false
   - type: class
     target: some_filter.NonExistentFilter
     some_arg: ${some_value}
