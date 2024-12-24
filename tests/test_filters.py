@@ -73,6 +73,32 @@ class TestFilterExpr:
             DictConfig({"foo": "bar"}), "", "foo == 'baz'"
         )
 
+        # Test cases for evaluating a valid expression with nested variables
+        # and function calls that return True
+        assert filter_expr.filter(
+            DictConfig({"foo": {"bar": "baz"}}), "", "foo.bar == 'baz'"
+        )
+        assert filter_expr.filter(
+            DictConfig({"foo": {"bar": {"baz": "jazz"}}}),
+            "",
+            "foo.bar.baz == 'jazz'",
+        )
+        assert filter_expr.filter(
+            DictConfig({"foo": {"bar": 1}}), "", "str(foo.bar) == '1'"
+        )
+        assert filter_expr.filter(
+            DictConfig({"foo": {"bar": 1}}), "", "foo.bar == int('1')"
+        )
+        assert filter_expr.filter(
+            DictConfig({"foo": {"bar": 1}}), "", "foo.bar in [1,2,3]"
+        )
+        assert filter_expr.filter(
+            DictConfig({"foo": {"bar": "123"}}), "", "foo.bar.startswith('1')"
+        )
+        assert filter_expr.filter(
+            DictConfig({"foo": {"bar": "123"}}), "", "len(foo.bar) == 3"
+        )
+
         # Test case for evaluating an invalid expression with missing variable
         with pytest.raises(EvalException):
             filter_expr.filter(
