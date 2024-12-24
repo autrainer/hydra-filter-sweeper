@@ -73,6 +73,9 @@ hydra:
 
 Filter configurations based on a Python expression that evaluates to `True` or `False`.
 The context of the expression is the configuration itself.
+All keys in the configuration are added to the attributes list of the
+evaluation model in addition to lists, tuples, and safe function calls
+(e.g., str, int, float, len).
 The configuration is excluded if the expression evaluates to `True`.
 
 **Parameters**:
