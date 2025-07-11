@@ -5,7 +5,7 @@ from hydra.test_utils.launcher_common_tests import (
     IntegrationTestSuite,
     LauncherTestSuite,
 )
-from pytest import mark
+import pytest
 
 from hydra_plugins.filter import FilterSweeper
 
@@ -16,8 +16,8 @@ def test_discovery() -> None:
     ]
 
 
-@mark.parametrize(
-    "launcher_name, overrides",
+@pytest.mark.parametrize(
+    ("launcher_name", "overrides"),
     [
         (
             "basic",
@@ -28,8 +28,8 @@ def test_discovery() -> None:
 class TestFilterSweeper(LauncherTestSuite): ...
 
 
-@mark.parametrize(
-    "launcher_name, overrides",
+@pytest.mark.parametrize(
+    ("launcher_name", "overrides"),
     [
         (
             "basic",
@@ -43,8 +43,8 @@ class TestFilterSweeper(LauncherTestSuite): ...
 class TestFilterSweeperWithBatching(BatchedSweeperTestSuite): ...
 
 
-@mark.parametrize(
-    "task_launcher_cfg, extra_flags",
+@pytest.mark.parametrize(
+    ("task_launcher_cfg", "extra_flags"),
     [
         (
             {},

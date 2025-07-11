@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import os
+from typing import Any, Dict, Union
 
 from evalidate import Expr, base_eval_model
 import hydra
@@ -13,7 +14,7 @@ class AbstractFilter(ABC):
     """
 
     @abstractmethod
-    def filter(self, config: DictConfig, directory: str, **kwargs) -> bool:
+    def filter(self, config: DictConfig, directory: str, **kwargs: Any) -> bool:
         """
         Abstract method for filtering based on the given configuration and
         directory.
@@ -37,7 +38,7 @@ class FilterExists(AbstractFilter):
     of the job.
     """
 
-    def filter(self, config: DictConfig, directory: str, path: str) -> bool:
+    def filter(self, config: DictConfig, directory: str, path: str) -> bool:  # type: ignore[override]
         """
         Filter based on the existence of a file or directory in the directory
         of the job.
@@ -62,7 +63,7 @@ class FilterExpr(AbstractFilter):
     configuration context.
     """
 
-    def filter(self, config: DictConfig, directory: str, expr: str) -> bool:
+    def filter(self, config: DictConfig, directory: str, expr: str) -> bool:  # type: ignore[override]
         """
         Filter based on the evaluation of a Python expression using the
         configuration context.
@@ -92,7 +93,7 @@ class FilterExpr(AbstractFilter):
 
         keys = set()
 
-        def extract_keys(cfg: DictConfig) -> None:
+        def extract_keys(cfg: Union[DictConfig, Dict[str, Any]]) -> None:
             for key, value in cfg.items():
                 if isinstance(value, (dict, DictConfig)):
                     extract_keys(value)
@@ -110,12 +111,12 @@ class FilterClass(AbstractFilter):
 
     """
 
-    def filter(
+    def filter(  # type: ignore[override]
         self,
         config: DictConfig,
         directory: str,
         target: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> bool:
         """Filter based on the return value of the filter class.
 

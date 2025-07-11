@@ -49,7 +49,7 @@ class FilterSweeper(BasicSweeper):
         super().__init__(max_batch_size, params)
         self.filters = filters
 
-    def split_arguments(
+    def split_arguments(  # type: ignore[override]
         self,
         overrides: List[Override],
         max_batch_size: Optional[int],
@@ -65,10 +65,10 @@ class FilterSweeper(BasicSweeper):
             The batched and filtered overrides.
 
         """
-        overrides = BasicSweeper.split_arguments(overrides, max_batch_size)
+        ov = BasicSweeper.split_arguments(overrides, max_batch_size)
         if self.filters:
-            return self._filter_overrides_list(overrides)
-        return overrides
+            return self._filter_overrides_list(ov)
+        return ov
 
     def _filter_overrides_list(
         self,
@@ -112,6 +112,8 @@ class FilterSweeper(BasicSweeper):
             or fails and `fail` is `True`.
 
         """
+        if not self.config or not self.hydra_context:
+            return False  # pragma: no cover
         config = self.hydra_context.config_loader.load_sweep_config(
             self.config,
             override,
@@ -123,15 +125,17 @@ class FilterSweeper(BasicSweeper):
             config.hydra.sweep.get("subdir", str(idx)),
         )
         del config["hydra"]
+        if not self.filters:
+            return False  # pragma: no cover
         for f in self.filters.copy():
             try:
                 filter_type = f.pop("type")
-            except KeyError:
-                raise ValueError(f"Filter type not specified: {f}")
+            except KeyError as e:
+                raise ValueError(f"Filter type not specified: {f}") from e
             try:
                 filter_cls = FILTERMAP[filter_type]
-            except KeyError:
-                raise ValueError(f"Filter type '{filter_type}' not supported")
+            except KeyError as e:
+                raise ValueError(f"Filter type '{filter_type}' not supported") from e
             fail = f.pop("fail", True)
             should_log = f.pop("log", True)
             try:
@@ -146,7 +150,7 @@ class FilterSweeper(BasicSweeper):
 
             if should_filter:
                 if should_log:
-                    override = " ".join(override)
-                    log.info(f"Filtered: {override} with {filter_type}: {f}")
+                    msg = f"Filtered: {' '.join(override)} with {filter_type}: {f}"
+                    log.info(msg)
                 return True
         return False

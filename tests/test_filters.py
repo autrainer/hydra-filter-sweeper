@@ -12,66 +12,64 @@ from hydra_filter_sweeper.filters import (
 
 
 @pytest.fixture
-def filter_exists():
+def filter_exists() -> FilterExists:
     return FilterExists()
 
 
 @pytest.fixture
-def filter_expr():
+def filter_expr() -> FilterExpr:
     return FilterExpr()
 
 
 @pytest.fixture
-def filter_class():
+def filter_class() -> FilterClass:
     return FilterClass()
 
 
 class TestAbstractFilter:
-    def test_filter(self):
+    def test_filter(self) -> None:
         # Test case for instantiating an AbstractFilter object
         with pytest.raises(TypeError):
-            AbstractFilter()
+            AbstractFilter()  # type: ignore[abstract]
 
 
 class TestFilterExists:
-    def test_filter(self, filter_exists: FilterExists):
+    def test_filter(self, filter_exists: FilterExists) -> None:
         # Test case for filtering a file that exists
-        assert filter_exists.filter({}, "tests/test_files", "some.file")
+        assert filter_exists.filter(DictConfig({}), "tests/test_files", "some.file")
 
         # Test case for filtering a directory that exists
-        assert filter_exists.filter({}, "tests/test_files", "subdir")
+        assert filter_exists.filter(DictConfig({}), "tests/test_files", "subdir")
 
         # Test case for filtering a file that does not exist
         assert not filter_exists.filter(
-            {}, "tests/test_files", "nonexistent.file"
+            DictConfig({}), "tests/test_files", "nonexistent.file"
         )
 
         # Test case for filtering a directory that does not exist
         assert not filter_exists.filter(
-            {}, "tests/test_files", "nonexistent_directory"
+            DictConfig({}), "tests/test_files", "nonexistent_directory"
         )
 
-    def test_filter_with_subdir(self, filter_exists: FilterExists):
+    def test_filter_with_subdir(self, filter_exists: FilterExists) -> None:
         # Test case for filtering a file in a subdir that exists
-        assert filter_exists.filter({}, "tests/test_files", "subdir/some.file")
+        assert filter_exists.filter(
+            DictConfig({}), "tests/test_files", "subdir/some.file"
+        )
 
         # Test case for filtering a file in a subdir that does not exist
         assert not filter_exists.filter(
-            {}, "tests/test_files", "subdir/nonexistent.file"
+            DictConfig({}), "tests/test_files", "subdir/nonexistent.file"
         )
 
 
 class TestFilterExpr:
-    def test_filter(self, filter_expr: FilterExpr):
+    def test_filter(self, filter_expr: FilterExpr) -> None:
         # Test case for evaluating a valid expression that returns True
-        assert filter_expr.filter(
-            DictConfig({"foo": "bar"}), "", "foo == 'bar'"
-        )
+        assert filter_expr.filter(DictConfig({"foo": "bar"}), "", "foo == 'bar'")
 
         # Test case for evaluating a valid expression that returns False
-        assert not filter_expr.filter(
-            DictConfig({"foo": "bar"}), "", "foo == 'baz'"
-        )
+        assert not filter_expr.filter(DictConfig({"foo": "bar"}), "", "foo == 'baz'")
 
         # Test cases for evaluating a valid expression with nested variables
         # and function calls that return True
@@ -101,9 +99,7 @@ class TestFilterExpr:
 
         # Test case for evaluating an invalid expression with missing variable
         with pytest.raises(EvalException):
-            filter_expr.filter(
-                DictConfig({"foo": "bar"}), "", "foo == invalid"
-            )
+            filter_expr.filter(DictConfig({"foo": "bar"}), "", "foo == invalid")
 
         # Test case for evaluating an unsafe expression
         with pytest.raises(EvalException):
@@ -115,7 +111,7 @@ class TestFilterExpr:
 
 
 class TestFilterClass:
-    def test_filter(self, filter_class: FilterClass):
+    def test_filter(self, filter_class: FilterClass) -> None:
         # Test case for filtering a class that returns True
         assert filter_class.filter(
             DictConfig({"return_value": True}),
@@ -132,12 +128,12 @@ class TestFilterClass:
 
         # Test case for filtering a nonexistent module
         with pytest.raises(InstantiationException):
-            filter_class.filter({}, "", "nonexistent_module")
+            filter_class.filter(DictConfig({}), "", "nonexistent_module")
 
         # Test case for filtering a nonexistent class
         with pytest.raises(InstantiationException):
             filter_class.filter(
-                {},
+                DictConfig({}),
                 "",
                 "tests.test_files.test_filter_classes.NonexistentFilter",
             )
