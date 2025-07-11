@@ -1,20 +1,20 @@
 import logging
 from pathlib import Path
 import tempfile
+from typing import Generator, Type
 
 from hydra.test_utils.test_utils import TSweepRunner
 import pytest
-from pytest import mark
 
 
 @pytest.fixture
-def temp_dir():
+def temp_dir() -> Generator[Path, None, None]:
     with tempfile.TemporaryDirectory() as tmpdir:
         yield Path(tmpdir)
 
 
-@mark.parametrize(
-    "config_name, expected",
+@pytest.mark.parametrize(
+    ("config_name", "expected"),
     [
         ("without_filters", 9),
         ("with_filters", 7),
@@ -24,7 +24,7 @@ def test_filter_configurations(
     hydra_sweep_runner: TSweepRunner,
     config_name: str,
     expected: int,
-    temp_dir,
+    temp_dir: Path,
 ) -> None:
     sweep = hydra_sweep_runner(
         calling_file=__file__,
@@ -41,8 +41,8 @@ def test_filter_configurations(
         assert len(job_ret) == expected
 
 
-@mark.parametrize(
-    "config_name, raises",
+@pytest.mark.parametrize(
+    ("config_name", "raises"),
     [
         ("missing_filter_type", ValueError),
         ("unknown_filter_type", ValueError),
@@ -52,8 +52,8 @@ def test_filter_configurations(
 def test_error_types(
     hydra_sweep_runner: TSweepRunner,
     config_name: str,
-    raises: Exception,
-    temp_dir,
+    raises: Type[Exception],
+    temp_dir: Path,
 ) -> None:
     sweep = hydra_sweep_runner(
         calling_file=__file__,
@@ -64,15 +64,14 @@ def test_error_types(
         overrides=None,
         temp_dir=temp_dir,
     )
-    with pytest.raises(raises):
-        with sweep:
-            ...  # pragma: no cover
+    with pytest.raises(raises), sweep:
+        ...  # pragma: no cover
 
 
 def test_suppress_logs(
     hydra_sweep_runner: TSweepRunner,
-    temp_dir,
-    caplog,
+    temp_dir: Path,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     sweep = hydra_sweep_runner(
         calling_file=__file__,
@@ -83,11 +82,10 @@ def test_suppress_logs(
         overrides=None,
         temp_dir=temp_dir,
     )
-    with caplog.at_level(logging.INFO):
-        with sweep:
-            assert sweep.returns is not None
-            job_ret = sweep.returns[0]
-            assert len(job_ret) == 7
+    with caplog.at_level(logging.INFO), sweep:
+        assert sweep.returns is not None
+        job_ret = sweep.returns[0]
+        assert len(job_ret) == 7
 
     assert "Filtered: +foo=1 +bar=two with expr" in caplog.text
     assert "Filtered: +foo=2 +bar=three with expr" not in caplog.text
