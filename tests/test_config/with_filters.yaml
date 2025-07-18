@@ -9,10 +9,14 @@ hydra:
       +foo: 1,2,3
       +bar: one, two, three
     filters:
-    - type: expr
-      expr: foo == 1 and bar == "two"
-    - type: expr
-      expr: foo == 2 and bar == "three"
-    - type: expr
-      expr: undefined == 1 and bar == "three"
-      fail: false
+      - hydra_filter_sweeper.Expression:
+          expr: foo == 1 and bar == "two"
+      - hydra_filter_sweeper.Expression:
+          expr: foo == 2 and bar == "three"
+      - hydra_filter_sweeper.Expression:
+          expr: undefined == 1 and bar == "three"
+          _fail_: false
+      - hydra_filter_sweeper.Expression:
+        expr: undefined == 1 and bar == "three"
+        _fail_: false
+        _log_: false

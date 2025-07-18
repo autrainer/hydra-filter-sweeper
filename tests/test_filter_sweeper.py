@@ -44,7 +44,6 @@ def test_filter_configurations(
 @pytest.mark.parametrize(
     ("config_name", "raises"),
     [
-        ("missing_filter_type", ValueError),
         ("unknown_filter_type", ValueError),
         ("failing_filter_type", ValueError),
     ],
@@ -87,6 +86,8 @@ def test_suppress_logs(
         job_ret = sweep.returns[0]
         assert len(job_ret) == 7
 
-    assert "Filtered: +foo=1 +bar=two with expr" in caplog.text
-    assert "Filtered: +foo=2 +bar=three with expr" not in caplog.text
+    print(caplog.text)
+
+    assert "Filtered: +foo=1 +bar=two" in caplog.text
+    assert "Filtered: +foo=2 +bar=three" not in caplog.text
     assert "+foo=2 +bar=three" not in caplog.text

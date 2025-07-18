@@ -9,7 +9,7 @@ hydra:
       +foo: 1,2,3
       +bar: one, two, three
     filters:
-    - type: expr
-      expr: foo == 1 and bar == "two"
-    - type: expr
-      expr: baz == 2 and bar == "three"
+      - hydra_filter_sweeper.Expression:
+          expr: foo == 1 and bar == "two"
+      - hydra_filter_sweeper.Expression:
+          expr: baz == 2 and bar == "three"
