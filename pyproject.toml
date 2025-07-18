@@ -1,6 +1,6 @@
 [project]
 name = "hydra-filter-sweeper"
-version = "1.2.0"
+version = "2.0.0"
 description = "A Hydra plugin to extend the basic sweeper with customizable filters."
 authors = [{ name = "Simon Rampp", email = "simon.rampp@tum.de" }]
 requires-python = "~=3.9"
