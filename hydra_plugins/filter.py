@@ -1,14 +1,17 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+import hydra
 from hydra._internal.core_plugins.basic_sweeper import BasicSweeper
 from hydra.core.config_store import ConfigStore
 from hydra.core.override_parser.types import Override
+from hydra.errors import InstantiationException
 from omegaconf import OmegaConf
 
-from hydra_filter_sweeper import FILTERMAP
+from hydra_filter_sweeper import AbstractFilter
 
 
 log = logging.getLogger(__name__)
@@ -96,6 +99,32 @@ class FilterSweeper(BasicSweeper):
                 out_overrides.append(out_batch)
         return out_overrides
 
+    @staticmethod
+    def _split_cfg(filter: Union[str, Dict[str, Any]]) -> Tuple[str, Dict[str, Any]]:
+        if isinstance(filter, str):
+            return filter, {}
+
+        key = next(iter(filter.keys()))  # assuming only one key or first is relevant
+        if len(filter.keys()) == 1:
+            return key, filter[key]
+
+        msg = (
+            f"Multiple keys found in filter definition:\n\t{filter}\n"
+            "This is likely due to missing indentation."
+        )
+        log.warning(msg)
+        filter.pop(key)
+        return key, filter
+
+    @staticmethod
+    def _instantiate(key: str, **kwargs: Any) -> AbstractFilter:
+        try:
+            kwargs.setdefault("_convert_", "all")
+            kwargs.setdefault("_recursive_", False)
+            return hydra.utils.instantiate({"_target_": key, **kwargs})
+        except InstantiationException as e:
+            raise ValueError(f"Failed to instantiate filter {key}: {e}") from e
+
     def _filter_override(self, override: List[str], idx: int) -> bool:
         """
         Applies a single filter to an override.
@@ -124,29 +153,24 @@ class FilterSweeper(BasicSweeper):
             config.hydra.sweep.dir,
             config.hydra.sweep.get("subdir", str(idx)),
         )
-        del config["hydra"]
         if not self.filters:
             return False  # pragma: no cover
+        del config["hydra"]
         for f in self.filters.copy():
+            filter_type, kwargs = self._split_cfg(f)
+            should_fail = kwargs.pop("_fail_", True)
+            should_log = kwargs.pop("_log_", True)
+            filter_cls = self._instantiate(
+                filter_type,
+                config=deepcopy(config),
+                directory=run_directory,
+            )
             try:
-                filter_type = f.pop("type")
-            except KeyError as e:
-                raise ValueError(f"Filter type not specified: {f}") from e
-            try:
-                filter_cls = FILTERMAP[filter_type]
-            except KeyError as e:
-                raise ValueError(f"Filter type '{filter_type}' not supported") from e
-            fail = f.pop("fail", True)
-            should_log = f.pop("log", True)
-            try:
-                should_filter = filter_cls().filter(
-                    config=config,
-                    directory=run_directory,
-                    **f,
-                )
+                should_filter = filter_cls.filter(**kwargs)
             except Exception as e:
-                if fail:
+                if should_fail:
                     raise ValueError(f"Filter {f} failed: {e}") from e
+                should_filter = False
 
             if should_filter:
                 if should_log:

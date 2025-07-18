@@ -1,23 +1,4 @@
-from typing import Dict, Type
-
-from hydra_filter_sweeper.filters import (
-    AbstractFilter,
-    FilterClass,
-    FilterExists,
-    FilterExpr,
-)
+from hydra_filter_sweeper.filters import AbstractFilter, Exists, Expression
 
 
-FILTERMAP: Dict[str, Type[AbstractFilter]] = {
-    "exists": FilterExists,
-    "expr": FilterExpr,
-    "class": FilterClass,
-}
-
-__all__ = [
-    "AbstractFilter",
-    "FilterExists",
-    "FilterExpr",
-    "FilterClass",
-    "FILTERMAP",
-]
+__all__ = ["AbstractFilter", "Exists", "Expression"]
