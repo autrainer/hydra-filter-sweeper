@@ -58,9 +58,9 @@ hydra:
       +foo: 1,2,3
       +bar: one, two, three
     filters:
-      - hydra_filter_swepper.Expression:
+      - hydra_filter_sweeper.Expression:
           expr: foo == 1 and bar == "two"
-      - hydra_filter_swepper.Exists:
+      - hydra_filter_sweeper.Exists:
           path: some_directory/some.file
       - some_custom_filter.SomeFilter:
           some_arg: ${some_value}
@@ -85,11 +85,11 @@ The configuration is excluded if the expression evaluates to `True`.
 
 ```yaml
 hydra/sweeper/filters:
-  - hydra_filter_swepper.Expression:
+  - hydra_filter_sweeper.Expression:
       expr: foo == 1 and bar == "two"
-  - hydra_filter_swepper.Expression:
+  - hydra_filter_sweeper.Expression:
       expr: bar == ${some_value}
-  - hydra_filter_swepper.Expression:
+  - hydra_filter_sweeper.Expression:
       expr: undefined == 1 and bar == "two"
       _fail_: false
       _log_: false
@@ -109,14 +109,14 @@ The configuration is excluded if the file or directory exists.
 
 ```yaml
 hydra/sweeper/filters:
-  - hydra_filter_swepper.Exists:
+  - hydra_filter_sweeper.Exists:
       path: some_directory/some.file
-  - hydra_filter_swepper.Exists:
+  - hydra_filter_sweeper.Exists:
       path: some_directory
       _log_: false
-  - hydra_filter_swepper.Exists:
+  - hydra_filter_sweeper.Exists:
       path: some_directory/${some_value}.file
-  - hydra_filter_swepper.Exists:
+  - hydra_filter_sweeper.Exists:
       path: null
       _fail_: false
 ```
