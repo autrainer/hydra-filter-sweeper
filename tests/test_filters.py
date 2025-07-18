@@ -1,174 +1,74 @@
 from evalidate import EvalException
-from hydra.errors import InstantiationException
 from omegaconf import DictConfig
 import pytest
 
-from hydra_filter_sweeper.filters import (
-    AbstractFilter,
-    FilterClass,
-    FilterExists,
-    FilterExpr,
-)
+from hydra_filter_sweeper import Exists, Expression
 
 
 @pytest.fixture
-def filter_exists() -> FilterExists:
-    return FilterExists()
+def exists() -> Exists:
+    return Exists(DictConfig({}), "tests/test_files")
 
 
-@pytest.fixture
-def filter_expr() -> FilterExpr:
-    return FilterExpr()
+def test_exists_files(exists: Exists) -> None:
+    assert exists.filter("some.file")
+    assert not exists.filter("missing.file")
 
 
-@pytest.fixture
-def filter_class() -> FilterClass:
-    return FilterClass()
+def test_exists_directories(exists: Exists) -> None:
+    assert exists.filter("subdir")
+    assert not exists.filter("missing_dir")
 
 
-class TestAbstractFilter:
-    def test_filter(self) -> None:
-        # Test case for instantiating an AbstractFilter object
-        with pytest.raises(TypeError):
-            AbstractFilter()  # type: ignore[abstract]
+def test_exists_directories_trailing_slashes(exists: Exists) -> None:
+    assert exists.filter("subdir/")
+    assert not exists.filter("missing_dir/")
 
 
-class TestFilterExists:
-    def test_filter(self, filter_exists: FilterExists) -> None:
-        # Test case for filtering a file that exists
-        assert filter_exists.filter(DictConfig({}), "tests/test_files", "some.file")
-
-        # Test case for filtering a directory that exists
-        assert filter_exists.filter(DictConfig({}), "tests/test_files", "subdir")
-
-        # Test case for filtering a file that does not exist
-        assert not filter_exists.filter(
-            DictConfig({}), "tests/test_files", "nonexistent.file"
-        )
-
-        # Test case for filtering a directory that does not exist
-        assert not filter_exists.filter(
-            DictConfig({}), "tests/test_files", "nonexistent_directory"
-        )
-
-    def test_filter_with_subdir(self, filter_exists: FilterExists) -> None:
-        # Test case for filtering a file in a subdir that exists
-        assert filter_exists.filter(
-            DictConfig({}), "tests/test_files", "subdir/some.file"
-        )
-
-        # Test case for filtering a file in a subdir that does not exist
-        assert not filter_exists.filter(
-            DictConfig({}), "tests/test_files", "subdir/nonexistent.file"
-        )
+def test_exists_with_subdir(exists: Exists) -> None:
+    assert exists.filter("subdir/some.file")
+    assert not exists.filter("subdir/missing.file")
 
 
-class TestFilterExpr:
-    def test_filter(self, filter_expr: FilterExpr) -> None:
-        # Test case for evaluating a valid expression that returns True
-        assert filter_expr.filter(DictConfig({"foo": "bar"}), "", "foo == 'bar'")
-
-        # Test case for evaluating a valid expression that returns False
-        assert not filter_expr.filter(DictConfig({"foo": "bar"}), "", "foo == 'baz'")
-
-        # Test cases for evaluating a valid expression with nested variables
-        # and function calls that return True
-        assert filter_expr.filter(
-            DictConfig({"foo": {"bar": "baz"}}), "", "foo.bar == 'baz'"
-        )
-        assert filter_expr.filter(
-            DictConfig({"foo": {"bar": {"baz": "jazz"}}}),
-            "",
-            "foo.bar.baz == 'jazz'",
-        )
-        assert filter_expr.filter(
-            DictConfig({"foo": {"bar": 1}}), "", "str(foo.bar) == '1'"
-        )
-        assert filter_expr.filter(
-            DictConfig({"foo": {"bar": 1}}), "", "foo.bar == int('1')"
-        )
-        assert filter_expr.filter(
-            DictConfig({"foo": {"bar": 1}}), "", "foo.bar in [1,2,3]"
-        )
-        assert filter_expr.filter(
-            DictConfig({"foo": {"bar": "123"}}), "", "foo.bar.startswith('1')"
-        )
-        assert filter_expr.filter(
-            DictConfig({"foo": {"bar": "123"}}), "", "len(foo.bar) == 3"
-        )
-
-        # Test case for evaluating an invalid expression with missing variable
-        with pytest.raises(EvalException):
-            filter_expr.filter(DictConfig({"foo": "bar"}), "", "foo == invalid")
-
-        # Test case for evaluating an unsafe expression
-        with pytest.raises(EvalException):
-            filter_expr.filter(
-                DictConfig({}),
-                "",
-                "__import__('os').system('echo unsafe')",
-            )
+def test_expression() -> None:
+    expr = Expression(DictConfig({"foo": "bar"}), "")
+    assert expr.filter("foo == 'bar'")
+    assert not expr.filter("foo == 'baz'")
+    assert expr.filter('foo == "bar"')
+    assert not expr.filter('foo == "baz"')
 
 
-class TestFilterClass:
-    def test_filter(self, filter_class: FilterClass) -> None:
-        # Test case for filtering a class that returns True
-        assert filter_class.filter(
-            DictConfig({"return_value": True}),
-            "",
-            "tests.test_files.test_filter_classes.TestReturnFilter",
-        )
+def test_expression_attribute_access() -> None:
+    expr = Expression(DictConfig({"foo": {"bar": "baz"}}), "")
+    assert expr.filter("foo.bar == 'baz'")
+    assert not expr.filter("foo.bar == 'qux'")
 
-        # Test case for filtering a class that returns False
-        assert not filter_class.filter(
-            DictConfig({"return_value": False}),
-            "",
-            "tests.test_files.test_filter_classes.TestReturnFilter",
-        )
 
-        # Test case for filtering a nonexistent module
-        with pytest.raises(InstantiationException):
-            filter_class.filter(DictConfig({}), "", "nonexistent_module")
+def test_expression_fn_call() -> None:
+    expr = Expression(DictConfig({"foo": {"bar": "baz"}}), "")
+    assert expr.filter("len(str(foo.bar)) == 3")
+    assert expr.filter("foo.bar in ['baz', 'qux']")
 
-        # Test case for filtering a nonexistent class
-        with pytest.raises(InstantiationException):
-            filter_class.filter(
-                DictConfig({}),
-                "",
-                "tests.test_files.test_filter_classes.NonexistentFilter",
-            )
+    expr = Expression(DictConfig({"foo": {"bar": 123}}), "")
+    assert expr.filter("foo.bar + 1 == 124")
+    assert not expr.filter("foo.bar + 1 == 123")
+    assert expr.filter("str(foo.bar) == '123'")
+    assert expr.filter("foo.bar == int('123')")
 
-        # Test case for filtering a class not inheriting from AbstractFilter
-        with pytest.raises(TypeError):
-            filter_class.filter(
-                DictConfig({"return_value": True}),
-                "",
-                "tests.test_files.test_filter_classes.TestInvalidFilter",
-            )
 
-        # Test case for filtering with additional arguments
-        assert not filter_class.filter(
-            DictConfig({"return_value": True}),
-            "",
-            "tests.test_files.test_filter_classes.TestArgEqualsFilter",
-            arg1="value1",
-            arg2="value2",
-        )
+def test_expression_invalid_syntax() -> None:
+    expr = Expression(DictConfig({"foo": "bar"}), "")
+    with pytest.raises(EvalException):
+        expr.filter("foo == 'bar' +")
+    with pytest.raises(EvalException):
+        expr.filter("foo == 'bar' * 2")
 
-        # Test case for filtering a class with too many arguments
-        with pytest.raises(TypeError):
-            filter_class.filter(
-                DictConfig({"return_value": True}),
-                "",
-                "tests.test_files.test_filter_classes.TestReturnFilter",
-                arg1="value1",
-                arg2="value2",
-            )
 
-        # Test case for filtering a class with too few arguments
-        with pytest.raises(TypeError):
-            filter_class.filter(
-                DictConfig({"return_value": True}),
-                "",
-                "tests.test_files.test_filter_classes.TestArgEqualsFilter",
-            )
+def test_expression_invalid_attribute_access() -> None:
+    with pytest.raises(EvalException):
+        Expression(DictConfig({}), "").filter("foo == 'value'")
+
+
+def test_expression_unsafe_code() -> None:
+    with pytest.raises(EvalException):
+        Expression(DictConfig({}), "").filter("__import__('os').system('echo unsafe')")
