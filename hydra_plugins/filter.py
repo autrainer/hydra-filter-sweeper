@@ -174,7 +174,12 @@ class FilterSweeper(BasicSweeper):
 
             if should_filter:
                 if should_log:
-                    msg = f"Filtered: {' '.join(override)} with {filter_type}: {f}"
+                    msg = f"Filtered: {' '.join(override)} with '{filter_type}'"
+                    reason = filter_cls.reason(**kwargs)
+                    if reason:
+                        msg += f": {reason}"
+                    else:  # pragma: no cover
+                        msg += "."
                     log.info(msg)
                 return True
         return False

@@ -128,6 +128,8 @@ The filter class should be specified by its Python relative import path.
 
 The the `filter` method is called with any additional keyword arguments provided in the configuration.
 
+The optional `reason` method can return an explanation for filtering the provided configuration and receives the same arguments as filter.
+
 **Example Configurations**
 
 ```python
@@ -137,6 +139,9 @@ from hydra_filter_sweeper import AbstractFilter
 class SomeFilter(AbstractFilter):
     def filter(self, some_arg: str) -> bool:
         return some_arg == "expected_value"
+
+    def reason(self, some_arg: str) -> str:
+        return f"Filtered because 'some_arg' matched the expected value!"
 
 class WithoutArguments(AbstractFilter):
     def filter(self) -> bool:

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import os
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 
 from evalidate import Expr, base_eval_model
 from omegaconf import DictConfig
@@ -27,6 +27,14 @@ class AbstractFilter(ABC):
         Returns:
             True if the filter condition is met, False otherwise.
         """
+
+    def reason(self, *args: Any, **kwargs: Any) -> Optional[str]:  # pragma: no cover
+        """Optional method to provide a reason for filtering.
+
+        Returns:
+            A string explaining the reason for filtering, or None if not implemented.
+        """
+        return None
 
 
 class Expression(AbstractFilter):
@@ -66,6 +74,9 @@ class Expression(AbstractFilter):
 
         return Expr(expr, model=model).eval(self.config)
 
+    def reason(self, expr: str) -> str:  # pragma: no cover
+        return f"Expression '{expr}' evaluated to True."
+
 
 class Exists(AbstractFilter):
     def filter(self, path: str) -> bool:
@@ -79,3 +90,8 @@ class Exists(AbstractFilter):
             True if the file or directory exists, False otherwise.
         """
         return os.path.exists(os.path.join(self.directory, path))
+
+    def reason(self, path: str) -> str:  # pragma: no cover
+        p = os.path.join(self.directory, path)
+        name = "File" if os.path.isfile(p) else "Directory"
+        return f"{name} '{path}' exists in directory '{self.directory}'."
